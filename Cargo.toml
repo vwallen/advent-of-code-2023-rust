@@ -1,0 +1,11 @@
+[package]
+name = "adventofcode-2023"
+version = "0.1.0"
+authors = ["Victor Allen <vwallen@antlab.net>"]
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.75"
+colored = "2.0.4"
+itertools = "0.12.0"
+scan_fmt = "0.2.0"

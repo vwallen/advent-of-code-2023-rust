@@ -1,0 +1,9 @@
+/target
+
+# input files
+input/*
+!input/*-example.txt
+
+# usual cruft
+.Ds_Store
+.idea
