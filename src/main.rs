@@ -1,6 +1,8 @@
+#[macro_use] extern crate sscanf;
 use colored::Colorize;
 
 pub mod day01;
+pub mod day02;
 
 // 🎁 == pending
 // 🌟 == complete
@@ -19,8 +21,13 @@ fn main() {
     }
 
     println!("{} {} {}", "----------".red(), "Day  2".bright_green(), "----------".red());
-    println!("🎁");
-    println!("🎁");
+    println!("\tCube Conundrum");
+    if let Ok(day02_input) = day02::prepare("day02.txt") {
+        let day02_part1 = day02::part_1(&day02_input);
+        let day02_part2 = day02::part_2(&day02_input);
+        println!("🎁 {}", day02_part1.unwrap());
+        println!("🎁 {}", day02_part2.unwrap());
+    }
 
     println!("{} {} {}", "----------".red(), "Day  3".bright_green(), "----------".red());
     println!("🎁");
