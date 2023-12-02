@@ -2,6 +2,7 @@
 
 # input files
 input/*
+!input/*-example*.txt
 !input/*-example.txt
 
 # usual cruft
