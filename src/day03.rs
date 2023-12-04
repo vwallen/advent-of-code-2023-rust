@@ -51,9 +51,9 @@ pub fn prepare(file_name: &str) -> Result<(Vec<Part>, HashMap<char, Vec<Point>>)
 
     for (iy, line) in input.iter().enumerate() {
         let mut buffer_end:isize = 0;
-        let mut y = iy.try_into().unwrap();
+        let y = iy.try_into().unwrap();
         for (ix, ch) in line.chars().enumerate() {
-            let mut x = ix.try_into().unwrap();
+            let x = ix.try_into().unwrap();
             match ch {
                 ch if ch.is_digit(10) => {
                     digit_buffer.push(ch);

@@ -4,6 +4,7 @@ use colored::Colorize;
 pub mod day01;
 pub mod day02;
 pub mod day03;
+pub mod day04;
 
 // 🎁 == pending
 // 🌟 == complete
@@ -38,6 +39,13 @@ fn main() {
         println!("🌟 {}", day03_part1.unwrap_or(0));
         println!("🌟 {}", day03_part2.unwrap_or(0));
     }
-
+    println!("{} {} {}", "----------".red(), "Day  4".bright_green(), "----------".red());
+    println!("\tScratchcards");
+    if let Ok(day04_input) = day04::prepare("day04.txt") {
+        let day04_part1 = day04::part_1(&day04_input);
+        let day04_part2 = day04::part_2(&day04_input);
+        println!("🎁 {}", day04_part1.unwrap_or(0));
+        println!("🎁 {}", day04_part2.unwrap_or(0));
+    }
     println!("{}", "============================".bright_red());
 }
