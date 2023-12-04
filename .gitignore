@@ -5,6 +5,9 @@ input/*
 !input/*-example*.txt
 !input/*-example.txt
 
+# puzzle files
+puzzles/*
+
 # usual cruft
 .Ds_Store
 .idea
