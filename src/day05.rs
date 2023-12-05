@@ -76,8 +76,7 @@ fn convert_chain(chain:&Vec<(usize, usize, usize)>, input:usize) -> usize {
     input
 }
 
-pub fn part_1((seeds, converters): &(Vec<usize>, HashMap<String, Vec<(usize, usize, usize)>>)) -> Option<usize> {
-    // TODO - waves hand at all this
+fn convert_seed(converters:&HashMap<String, Vec<(usize, usize, usize)>>, seed:usize) -> usize {
     let seed_2_soil = converters.get("seed-to-soil").unwrap();
     let soil_2_fertilizer = converters.get("soil-to-fertilizer").unwrap();
     let fertilizer_2_water = converters.get("fertilizer-to-water").unwrap();
@@ -86,46 +85,32 @@ pub fn part_1((seeds, converters): &(Vec<usize>, HashMap<String, Vec<(usize, usi
     let temperature_2_humidity = converters.get("temperature-to-humidity").unwrap();
     let humidity_2_location = converters.get("humidity-to-location").unwrap();
 
+    // YO, DAWG
+    convert_chain(humidity_2_location,
+        convert_chain(temperature_2_humidity,
+            convert_chain(light_2_temperature,
+                convert_chain(water_2_light,
+                    convert_chain(fertilizer_2_water,
+                        convert_chain(soil_2_fertilizer,
+                            convert_chain(seed_2_soil,
+                                          seed)))))))
+}
+
+pub fn part_1((seeds, converters): &(Vec<usize>, HashMap<String, Vec<(usize, usize, usize)>>)) -> Option<usize> {
     let mut locations:Vec<usize> = vec![];
     for seed in seeds {
-        // Yo, dawg
-        locations.push(
-            convert_chain(humidity_2_location,
-              convert_chain(temperature_2_humidity,
-                convert_chain(light_2_temperature,
-                  convert_chain(water_2_light,
-                    convert_chain(fertilizer_2_water,
-                      convert_chain(soil_2_fertilizer,
-                        convert_chain(seed_2_soil,
-                                      *seed))))))))
+        locations.push(convert_seed(converters, *seed))
     }
 
     Some(*locations.iter().min().unwrap())
 }
 
 pub fn part_2((seeds, converters): &(Vec<usize>, HashMap<String, Vec<(usize, usize, usize)>>)) -> Option<usize> {
-    let seed_2_soil = converters.get("seed-to-soil").unwrap();
-    let soil_2_fertilizer = converters.get("soil-to-fertilizer").unwrap();
-    let fertilizer_2_water = converters.get("fertilizer-to-water").unwrap();
-    let water_2_light = converters.get("water-to-light").unwrap();
-    let light_2_temperature = converters.get("light-to-temperature").unwrap();
-    let temperature_2_humidity = converters.get("temperature-to-humidity").unwrap();
-    let humidity_2_location = converters.get("humidity-to-location").unwrap();
-
     let mut locations:Vec<usize> = vec![];
     for seed_span in seeds.chunks(2) {
         // There's no force like brute force
         for seed in seed_span[0]..(seed_span[0] + seed_span[1]) {
-            // YO, DAWG!
-            locations.push(
-                convert_chain(humidity_2_location,
-                  convert_chain(temperature_2_humidity,
-                    convert_chain(light_2_temperature,
-                      convert_chain(water_2_light,
-                        convert_chain(fertilizer_2_water,
-                          convert_chain(soil_2_fertilizer,
-                            convert_chain(seed_2_soil,
-                                          seed))))))))
+            locations.push(convert_seed(converters, seed))
         }
     }
 
