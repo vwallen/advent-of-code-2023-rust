@@ -7,6 +7,7 @@ pub mod day03;
 pub mod day04;
 pub mod day05;
 pub mod day05b;
+pub mod day06;
 
 // 🎁 == pending
 // 🌟 == complete
@@ -56,9 +57,21 @@ fn main() {
     println!("\t🎁 If You Give a Seed a Fertilizer");
     if let Ok(day05b_input) = day05b::prepare("day05.txt") {
         let day05b_part1 = day05b::part_1(&day05b_input);
-        let day05b_part2 = day05b::part_2(&day05b_input);
+        // let day05b_part2 = day05b::part_2(&day05b_input);
         println!("🌟 {}", day05b_part1.unwrap_or(0));
-        println!("🌟 {}", day05b_part2.unwrap_or(0));
+        // println!("🌟 {}", day05b_part2.unwrap_or(0));
+    }
+    println!("{}", "============================".bright_red());
+
+    println!("{} {} {}", "----------".red(), "Day  6".bright_green(), "----------".red());
+    println!("\t🎁 Wait For It!");
+    if let Ok(day06_input) = day06::prepare_1("day06.txt") {
+        let day06_part1 = day06::part_1(&day06_input);
+        println!("🌟 {}", day06_part1.unwrap_or(0));
+    }
+    if let Ok(day06_input) = day06::prepare_2("day06.txt") {
+        let day06_part2 = day06::part_2(&day06_input);
+        println!("🌟 {}", day06_part2.unwrap_or(0));
     }
     println!("{}", "============================".bright_red());
 }
