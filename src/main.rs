@@ -9,6 +9,7 @@ pub mod day04;
 pub mod day05;
 pub mod day05b;
 pub mod day06;
+pub mod day07;
 
 // 🎁 == pending
 // 🌟 == complete
@@ -73,6 +74,16 @@ fn main() {
     if let Ok(day06_input) = day06::prepare_2("day06.txt") {
         let day06_part2 = day06::part_2(&day06_input);
         println!("🌟 {}", day06_part2.unwrap_or(0));
+    }
+    println!("{}", "============================".bright_red());
+
+    println!("{} {} {}", "----------".red(), "Day  7".bright_green(), "----------".red());
+    println!("\t🎁 Camel Cards");
+    if let Ok(mut input) = day07::prepare("day07.txt") {
+        let part1 = day07::part_1(&mut input);
+        let part2 = day07::part_2(&mut input);
+        println!("🌟 {}", part1.unwrap_or(0));
+        println!("🌟 {}", part2.unwrap_or(0));
     }
     println!("{}", "============================".bright_red());
 }
