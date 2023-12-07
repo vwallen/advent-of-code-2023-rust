@@ -4,8 +4,8 @@ use std::ops::Range;
 /// A range from `start` to `end` that supports set operations with other `Span`s
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Span {
-    start: usize,
-    end:   usize,
+    pub start: usize,
+    pub end:   usize,
 }
 impl Span {
 
