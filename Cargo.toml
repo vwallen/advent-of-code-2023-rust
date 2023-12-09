@@ -10,3 +10,41 @@ colored = "2.0.4"
 itertools = "0.12.0"
 sscanf = "0.4.1"
 counter = "0.5.7"
+divan = "0.1.5"
+
+
+[[bench]]
+name = "day01"
+harness = false
+
+[[bench]]
+name = "day02"
+harness = false
+
+[[bench]]
+name = "day03"
+harness = false
+
+[[bench]]
+name = "day04"
+harness = false
+
+[[bench]]
+name = "day05"
+harness = false
+
+[[bench]]
+name = "day06"
+harness = false
+
+[[bench]]
+name = "day07"
+harness = false
+
+[[bench]]
+name = "day08"
+harness = false
+
+[[bench]]
+name = "day09"
+harness = false

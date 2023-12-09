@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::str::FromStr;
 use std::cmp::{max, min};
-use adventofcode_2023::read_input_lines;
+use crate::read_input_lines;
 use anyhow::Result;
 
 #[derive(Debug, Eq, PartialEq, Clone)]

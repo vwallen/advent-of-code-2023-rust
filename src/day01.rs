@@ -1,6 +1,6 @@
 use std::collections::HashMap;
-use adventofcode_2023::read_input_lines;
 use anyhow::Result;
+use crate::read_input_lines;
 
 pub fn prepare(file_name: &str) -> Result<Vec<String>> {
     let input = read_input_lines(file_name);

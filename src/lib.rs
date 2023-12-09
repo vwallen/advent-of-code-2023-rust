@@ -1,5 +1,18 @@
+#[macro_use] extern crate sscanf;
+
 use std::env;
 use std::fs;
+
+pub mod util;
+pub mod day01;
+pub mod day02;
+pub mod day03;
+pub mod day04;
+pub mod day05;
+pub mod day06;
+pub mod day07;
+pub mod day08;
+pub mod day09;
 
 pub fn read_input(file_name: &str) -> String {
     let cwd = env::current_dir().unwrap();

@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use adventofcode_2023::read_input_lines;
+use crate::read_input_lines;
 use anyhow::Result;
 
 #[derive(Debug)]

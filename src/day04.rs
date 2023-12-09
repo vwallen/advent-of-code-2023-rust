@@ -1,5 +1,5 @@
 
-use adventofcode_2023::read_input_lines;
+use crate::read_input_lines;
 use anyhow::Result;
 use std::collections::HashSet;
 use std::str::FromStr;

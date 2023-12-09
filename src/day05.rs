@@ -1,5 +1,5 @@
 use std::str::FromStr;
-use adventofcode_2023::read_input_lines;
+use crate::read_input_lines;
 use anyhow::Result;
 use crate::util::span::Span;
 

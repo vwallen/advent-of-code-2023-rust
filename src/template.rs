@@ -1,5 +1,4 @@
-
-use adventofcode_2023::read_input_lines;
+use crate::read_input_lines;
 use anyhow::Result;
 
 pub fn prepare(file_name: &str) -> Result<Vec<String>> {
