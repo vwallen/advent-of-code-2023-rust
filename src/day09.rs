@@ -76,25 +76,9 @@ mod test {
     }
 
     #[test]
-    #[ignore]
-    fn test_part_1_puzzle() {
-        if let Ok(input) = prepare("day09.txt") {
-            assert_eq!(part_1(&input), Some(2008960228))
-        }
-    }
-
-    #[test]
     fn test_part_2() {
         if let Ok(input) = prepare("day09-example.txt") {
             assert_eq!(part_2(&input), Some(2))
-        }
-    }
-
-    #[test]
-    #[ignore]
-    fn test_part_2_puzzle() {
-        if let Ok(input) = prepare("day09.txt") {
-            assert_eq!(part_2(&input), Some(1097))
         }
     }
 }

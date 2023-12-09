@@ -1,12 +1,111 @@
-use std::collections::HashMap;
+use std::str::FromStr;
 use adventofcode_2023::read_input_lines;
 use anyhow::Result;
+use crate::util::span::Span;
 
-pub fn prepare(file_name: &str) -> Result<(Vec<usize>, HashMap<String, Vec<(usize, usize, usize)>>)> {
+#[derive(Debug, Eq, PartialEq)]
+pub struct ConversionRange {
+    input:Span,
+    output:Span,
+}
+impl FromStr for ConversionRange {
+    type Err = anyhow::Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let values:Vec<usize> = s.split_whitespace().filter_map(|n|n.parse().ok()).collect();
+        Ok(ConversionRange{
+            input:  Span::new(values[1], values[1] + values[2]),
+            output: Span::new(values[0], values[0] + values[2]),
+        })
+    }
+}
+impl ConversionRange {
+    fn convert(&self, value:usize) -> Option<usize> {
+        // Converts value within input range into value in output
+        // Unmatched values return None
+        //      x     y
+        //         |------|
+        //      ↓     ↓
+        //            z
+        if self.input.contains_value(value) {
+            Some(value - self.input.start + self.output.start)
+        } else {
+            None
+        }
+    }
+
+    fn convert_span(&self, value:&Span) -> Option<Span> {
+        // Converts ranges within input range into values in output
+        // Unmatched range segments return None
+        //     |-------------|
+        //         |------|
+        //     ↓   ↓      ↓  ↓
+        //         |======|
+        if let Some(span) = value.intersection(&self.input) {
+            Some(Span::new(
+                span.start - self.input.start + self.output.start,
+                span.end   - self.input.start + self.output.start
+            ))
+        } else {
+            None
+        }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub struct ConversionTable {
+    id: String,
+    conversions:Vec<ConversionRange>,
+}
+impl ConversionTable {
+    fn convert(&self, value:usize) -> Option<usize> {
+        // Converts value within multiple input ranges into value in outputs
+        // Unmatched values are returned
+        //      x     y      z
+        //         |------|
+        //                |-----|
+        //      ↓     ↓      ↓
+        //      x     a      b
+        let mut converted_value:usize = value;
+        for conversion in self.conversions.iter() {
+            if let Some(new_value) = conversion.convert(value) {
+                converted_value = new_value
+            }
+        }
+        Some(converted_value)
+    }
+
+    fn convert_span(&self, value:&Span) -> Option<Vec<Span>> {
+        // Converts ranges within multiple input ranges into ranges in outputs
+        // Unmatched range segments are returned
+        //      |---------------|
+        //         |------|
+        //                |--|
+        //      ↓  ↓      ↓  ↓  ↓
+        //      |--|======|~~|--|
+        let mut remaining_values:Vec<Span> = vec![value.clone()];
+        let mut converted_values:Vec<Span> = Vec::new();
+        for conversion in self.conversions.iter() {
+            if let Some(new_value) = conversion.convert_span(value) {
+                // remove the converted range segment from the original range
+                remaining_values = remaining_values
+                    .iter()
+                    .flat_map(|v| v.subtraction(&conversion.input).unwrap_or(vec![]))
+                    .collect();
+                converted_values.push(new_value);
+            }
+        }
+        // include remaining unconverted range segments in output
+        converted_values.extend(remaining_values);
+        Some(converted_values)
+    }
+}
+
+pub fn prepare(file_name: &str) -> Result<(Vec<usize>, Vec<ConversionTable>)> {
     let input = read_input_lines(file_name);
+
     let mut seeds:Vec<usize> = vec![];
-    let mut converters:HashMap<String, Vec<(usize, usize, usize)>> = HashMap::new();
-    let mut conversions:Vec<Vec<(usize, usize, usize)>> = vec![];
+    let mut conversion_tables:Vec<ConversionTable> = vec![];
+    let mut current:ConversionTable = ConversionTable{id:"".to_string(), conversions:vec![]};
 
     for line in input.iter() {
         // skip empty lines
@@ -24,97 +123,70 @@ pub fn prepare(file_name: &str) -> Result<(Vec<usize>, HashMap<String, Vec<(usiz
         }
 
         // grab the conversion table headers to use as keys
+        // this starts a new conversion table
         if line.contains(":") {
-            // can skip parsing the header since we insert it manually later ::sigh::
-            // let (header, _) = line.split_once(" ").unwrap();
-            // // have to convert the header to a String because the &str
-            // // still belongs to line and I can't return it as part of
-            // // a HashMap
-            // converters.insert(String::from(header), vec![]);
-
-            // start a new list of conversion triptychs
-            conversions.push(vec![]);
+            // save the current conversion table and start a new one
+            // don't bother with the empty one we had to initialize before
+            if current.id != "" {
+                conversion_tables.push(current);
+            }
+            let (header, _) = line.split_once(" ").unwrap();
+            current = ConversionTable{
+                id: header.to_string(),
+                conversions: vec![],
+            };
             continue;
         }
 
-        // parse the conversion range triptychs and add to a vec to drop into
-        // the HashMap later
-        let values:Vec<usize> = line.trim().split_whitespace().filter_map(|n|n.parse().ok()).collect();
-        let current = conversions.last_mut().unwrap();
-        current.push((values[0], values[1], values[2]));
+        // parse line values for the conversion tables
+        let conversion_range:ConversionRange = line.parse().unwrap();
+        current.conversions.push(conversion_range);
     }
+    // catch the last conversion table
+    // to close out the loop
+    conversion_tables.push(current);
 
-    // manual get things into the hashmap because the borrow checker won't let a Vec
-    // exist in this loop and in a HashMap at the same time
-    converters.insert("seed-to-soil".to_string(), conversions[0].clone());
-    converters.insert("soil-to-fertilizer".to_string(), conversions[1].clone());
-    converters.insert("fertilizer-to-water".to_string(), conversions[2].clone());
-    converters.insert("water-to-light".to_string(), conversions[3].clone());
-    converters.insert("light-to-temperature".to_string(), conversions[4].clone());
-    converters.insert("temperature-to-humidity".to_string(), conversions[5].clone());
-    converters.insert("humidity-to-location".to_string(), conversions[6].clone());
-
-    Ok((seeds, converters))
+    // using Vec for seeds and conversion tables
+    // because the tables are applied in the order
+    // they appear in the input file
+    Ok((seeds, conversion_tables))
 }
 
-fn convert(conversion:(usize, usize, usize), input:usize) -> Option<usize> {
-    let in_range = conversion.1..(conversion.1 + conversion.2);
-    let ot_range = conversion.0..(conversion.0 + conversion.2);
-    if in_range.contains(&input) {
-        Some(input - in_range.start + ot_range.start)
-    } else {
-        None
-    }
-}
-
-fn convert_chain(chain:&Vec<(usize, usize, usize)>, input:usize) -> usize {
-    for conversion in chain.iter() {
-        if let Some(output) = convert(*conversion, input) {
-            return output
-        }
-    }
-    input
-}
-
-fn convert_seed(converters:&HashMap<String, Vec<(usize, usize, usize)>>, seed:usize) -> usize {
-    let seed_2_soil = converters.get("seed-to-soil").unwrap();
-    let soil_2_fertilizer = converters.get("soil-to-fertilizer").unwrap();
-    let fertilizer_2_water = converters.get("fertilizer-to-water").unwrap();
-    let water_2_light = converters.get("water-to-light").unwrap();
-    let light_2_temperature = converters.get("light-to-temperature").unwrap();
-    let temperature_2_humidity = converters.get("temperature-to-humidity").unwrap();
-    let humidity_2_location = converters.get("humidity-to-location").unwrap();
-
-    // YO, DAWG
-    convert_chain(humidity_2_location,
-        convert_chain(temperature_2_humidity,
-            convert_chain(light_2_temperature,
-                convert_chain(water_2_light,
-                    convert_chain(fertilizer_2_water,
-                        convert_chain(soil_2_fertilizer,
-                            convert_chain(seed_2_soil,
-                                          seed)))))))
-}
-
-pub fn part_1((seeds, converters): &(Vec<usize>, HashMap<String, Vec<(usize, usize, usize)>>)) -> Option<usize> {
+pub fn part_1((seeds, conversion_tables):&(Vec<usize>, Vec<ConversionTable>)) -> Option<usize> {
     let mut locations:Vec<usize> = vec![];
-    for seed in seeds {
-        locations.push(convert_seed(converters, *seed))
+    for seed in seeds.iter() {
+        locations.push(
+            conversion_tables
+                .iter()
+                .fold(*seed, |a, x| {
+                    x.convert(a).unwrap()
+                }));
     }
-
     Some(*locations.iter().min().unwrap())
 }
 
-pub fn part_2((seeds, converters): &(Vec<usize>, HashMap<String, Vec<(usize, usize, usize)>>)) -> Option<usize> {
-    let mut locations:Vec<usize> = vec![];
+pub fn part_2((seeds, conversion_tables):&(Vec<usize>, Vec<ConversionTable>)) -> Option<usize> {
+    // for each seed range, convert it into a list of new contiguous ranges
+    // pass each set of ranges to the next conversion table to get a new list
+    // sort final ranges to determine the start value of the lowest range
+    let mut locations:Vec<Span> = vec![];
     for seed_span in seeds.chunks(2) {
-        // There's no force like brute force
-        for seed in seed_span[0]..(seed_span[0] + seed_span[1]) {
-            locations.push(convert_seed(converters, seed))
-        }
+        let seed = vec![Span::new(seed_span[0], seed_span[0] + seed_span[1])];
+        locations.extend(
+            conversion_tables
+                .iter()
+                .fold(seed,
+                      |seeds, table| {
+                          seeds
+                              .iter()
+                              .flat_map(|seed| table.convert_span(seed).unwrap())
+                              .collect()
+                      })
+        );
     }
+    locations.sort_by(|a, b| a.start.cmp(&b.start));
 
-    Some(*locations.iter().min().unwrap())
+    Some(locations.first().unwrap().start)
 }
 
 #[cfg(test)]
@@ -124,31 +196,54 @@ mod test {
 
     #[test]
     fn test_prepare() {
-        if let Ok((seeds, converters)) = prepare("day05-example.txt") {
+        if let Ok((seeds, conversion_tables)) = prepare("day05-example.txt") {
             assert_eq!(seeds, vec![79, 14, 55, 13]);
-            assert_eq!(converters.get("water-to-light").unwrap(), &vec![(88, 18, 7), (18, 25, 70)])
+            assert_eq!(conversion_tables[3], ConversionTable{
+                id:"water-to-light".to_string(),
+                conversions: vec![
+                    ConversionRange{input: Span::new(18, 25), output: Span::new(88, 95)},
+                    ConversionRange{input: Span::new(25, 95), output: Span::new(18, 88)},
+                ]
+            });
         }
     }
 
     #[test]
     fn text_convert() {
-        // seed-to-soil map:
-        // 50 98 2
-        // 52 50 48
-        // seed number 98 corresponds to soil number 50
-        // seed number 53 corresponds to soil number 55
-        assert_eq!(convert((50, 98, 2), 98), Some(50));
-        assert_eq!(convert( (52, 50, 48), 53), Some(55));
-        assert_eq!(convert_chain(&vec![(50, 98, 2), (52, 50, 48)], 53), 55);
+        let seed_to_soil = ConversionTable {
+            id:"seed-to-soil".to_string(),
+            conversions: vec![
+                ConversionRange{input: Span::new(98, 100), output: Span::new(50, 52)},
+                ConversionRange{input: Span::new(50, 98), output: Span::new(52, 100)},
+            ]
+        };
+        assert_eq!(seed_to_soil.convert(98), Some(50));
+        assert_eq!(seed_to_soil.convert(53), Some(55));
 
-        // Welp, turns out the ranges can overlap so order and early exit are important
-        // fertilizer-to-water map:
-        // 49 53 8
-        // 0 11 42
-        // 42 0 7
-        // 57 7 4
-        assert_eq!(convert_chain( &vec![(49, 53, 8), (0, 11, 42), (42, 0, 7), (57, 7, 4)], 53), 49);
+        let fertilizer_to_water = ConversionTable {
+            id:"fertilizer-to-water".to_string(),
+            conversions: vec![
+                ConversionRange{input: Span::new(53, 61), output: Span::new(49, 57)},
+                ConversionRange{input: Span::new(11, 53), output: Span::new(0, 42)},
+                ConversionRange{input: Span::new(0, 7),   output: Span::new(42, 49)},
+                ConversionRange{input: Span::new(7, 11),  output: Span::new(57, 61)},
+            ]
+        };
+        assert_eq!(fertilizer_to_water.convert(53), Some(49));
+    }
 
+    #[test]
+    fn test_convert_span() {
+        if let Ok((_, conversion_tables)) = prepare("day05-example.txt") {
+            let humidity: Vec<Span> = vec![Span::new(46, 57), Span::new(78, 81)];
+            let humidity_to_location = &conversion_tables[6];
+            let mut locations:Vec<Span> = humidity
+                .iter()
+                .flat_map(|seed| humidity_to_location.convert_span(seed).unwrap())
+                .collect();
+            locations.sort_by(|a, b| a.start.cmp(&b.start));
+            assert_eq!(locations,  vec![Span::new(46, 56), Span::new(60, 61), Span::new(82, 85)]);
+        }
     }
 
     #[test]
@@ -162,6 +257,20 @@ mod test {
     fn test_part_2() {
         if let Ok(input) = prepare("day05-example.txt") {
             assert_eq!(part_2(&input), Some(46))
+        }
+    }
+
+    #[test]
+    fn test_part_1_puzzle() {
+        if let Ok(input) = prepare("day05.txt") {
+            assert_eq!(part_1(&input), Some(462648396))
+        }
+    }
+
+    #[test]
+    fn test_part_2_puzzle() {
+        if let Ok(input) = prepare("day05.txt") {
+            assert_eq!(part_2(&input), Some(2520479))
         }
     }
 }

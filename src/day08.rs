@@ -99,7 +99,6 @@ mod test {
     use super::*;
 
     #[test]
-    #[ignore]
     fn test_prepare() {
         if let Ok((instructions, nodes)) = prepare("day08-example-1.txt") {
             assert_eq!(instructions, vec!['R', 'L']);

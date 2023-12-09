@@ -8,7 +8,7 @@ pub mod day01;
 pub mod day02;
 pub mod day03;
 pub mod day04;
-pub mod day05c;
+pub mod day05;
 pub mod day06;
 pub mod day07;
 pub mod day08;
@@ -59,11 +59,11 @@ fn main() {
 
     println!("{} {} {}", "----------".red(), "Day  5".bright_green(), "----------".red());
     println!("\t🎁 If You Give a Seed a Fertilizer");
-    if let Ok(input) = day05c::prepare("day05.txt") {
-        let part1 = day05c::part_1(&input);
+    if let Ok(input) = day05::prepare("day05.txt") {
+        let part1 = day05::part_1(&input);
 
         let start = SystemTime::now();
-        let part2 = day05c::part_2(&input);
+        let part2 = day05::part_2(&input);
         let end = SystemTime::now();
         let duration = end.duration_since(start).unwrap();
 
