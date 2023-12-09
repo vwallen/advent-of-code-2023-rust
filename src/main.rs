@@ -11,6 +11,7 @@ pub mod day04;
 pub mod day05c;
 pub mod day06;
 pub mod day07;
+pub mod day08;
 
 // 🎁 == pending
 // 🌟 == complete
@@ -85,6 +86,15 @@ fn main() {
     if let Ok(mut input) = day07::prepare("day07.txt") {
         let part1 = day07::part_1(&mut input);
         let part2 = day07::part_2(&mut input);
+        println!("🌟 {}", part1.unwrap_or(0));
+        println!("🌟 {}", part2.unwrap_or(0));
+    }
+
+    println!("{} {} {}", "----------".red(), "Day  8".bright_green(), "----------".red());
+    println!("\t🎁 Haunted Wasteland");
+    if let Ok(input) = day08::prepare("day08.txt") {
+        let part1 = day08::part_1(&input);
+        let part2 = day08::part_2(&input);
         println!("🌟 {}", part1.unwrap_or(0));
         println!("🌟 {}", part2.unwrap_or(0));
     }
