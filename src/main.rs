@@ -12,6 +12,7 @@ pub mod day05c;
 pub mod day06;
 pub mod day07;
 pub mod day08;
+pub mod day09;
 
 // 🎁 == pending
 // 🌟 == complete
@@ -95,6 +96,15 @@ fn main() {
     if let Ok(input) = day08::prepare("day08.txt") {
         let part1 = day08::part_1(&input);
         let part2 = day08::part_2(&input);
+        println!("🌟 {}", part1.unwrap_or(0));
+        println!("🌟 {}", part2.unwrap_or(0));
+    }
+
+    println!("{} {} {}", "----------".red(), "Day  9".bright_green(), "----------".red());
+    println!("\t🎁 Mirage Maintenance");
+    if let Ok(input) = day09::prepare("day09.txt") {
+        let part1 = day09::part_1(&input);
+        let part2 = day09::part_2(&input);
         println!("🌟 {}", part1.unwrap_or(0));
         println!("🌟 {}", part2.unwrap_or(0));
     }
