@@ -97,5 +97,23 @@ fn main() {
         println!("🌟 {}", part2.unwrap_or(0));
     }
 
+    println!("{} {} {}", "----------".red(), "Day 10".bright_green(), "----------".red());
+    println!("\t🎁 Mirage Maintenance");
+    if let Ok(input) = day10::prepare("day10.txt") {
+        let part1 = day10::part_1(&input);
+        let part2 = day10::part_2(&input);
+        println!("🌟 {}", part1.unwrap_or(0));
+        println!("🌟 {}", part2.unwrap_or(0));
+    }
+
+    println!("{} {} {}", "----------".red(), "Day 11".bright_green(), "----------".red());
+    println!("\t🎁 Mirage Maintenance");
+    if let Ok(input) = day11::prepare("day11.txt") {
+        let part1 = day11::part_1(&input);
+        let part2 = day11::part_2(&input);
+        println!("🌟 {}", part1.unwrap_or(0));
+        println!("🌟 {}", part2.unwrap_or(0));
+    }
+
     println!("{}", "============================".bright_red());
 }
