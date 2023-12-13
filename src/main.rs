@@ -115,5 +115,14 @@ fn main() {
         println!("🌟 {}", part2.unwrap_or(0));
     }
 
+    println!("{} {} {}", "----------".red(), "Day 12".bright_green(), "----------".red());
+    println!("\t🎁 Hot Springs");
+    if let Ok(input) = day12::prepare("day12.txt") {
+        let part1 = day12::part_1(&input);
+        let part2 = day12::part_2(&input);
+        println!("🌟 {}", part1.unwrap_or(0));
+        println!("🌟 {}", part2.unwrap_or(0));
+    }
+
     println!("{}", "============================".bright_red());
 }

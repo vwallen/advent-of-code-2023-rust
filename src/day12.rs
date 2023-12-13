@@ -21,9 +21,29 @@ impl Record {
                     })
                 },
                 _ => unreachable!(),
-            };
+            }
+            .iter()
+            .filter(|opt| self.check_partial(opt))
+            .map(String::clone)
+            .collect();
         }
         options
+    }
+
+    pub fn check_partial(&self, permutation:&String) -> bool {
+        let sequence:Vec<usize> = permutation
+            .split(".")
+            .map(|s| s.len())
+            .filter(|s| s > &0_usize)
+            .collect();
+        for (i, block) in sequence.iter().enumerate() {
+            if let Some(requirement) = self.sequence.get(i) {
+                if block > &requirement {
+                    return false
+                }
+            }
+        }
+        true
     }
 
     pub fn check_permutation(&self, permutation:&String) -> bool {
@@ -80,7 +100,6 @@ mod test {
     }
 
     #[test]
-    #[ignore]
     fn test_part_1_puzzle() {
         if let Ok(input) = prepare("day12.txt") {
             assert_eq!(part_1(&input), Some(7771))
