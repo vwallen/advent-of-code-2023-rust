@@ -13,9 +13,9 @@ fn bench_part_1() {
     }
 }
 
-#[divan::bench(name="part 2 (sample)", sample_size=1, sample_count=10)]
+#[divan::bench(name="part 2")]
 fn bench_part_2() {
-    if let Ok(input) = prepare("day12-example.txt") {
+    if let Ok(input) = prepare(INPUT) {
         part_2(&input);
     }
 }
