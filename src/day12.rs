@@ -1,3 +1,4 @@
+use std::time::SystemTime;
 use crate::read_input_lines;
 use anyhow::Result;
 
@@ -5,58 +6,83 @@ use anyhow::Result;
 pub struct Record {
     pattern: String,
     sequence: Vec<usize>,
+    needed: usize,
 }
 impl Record {
 
-    pub fn collect_permutations(&self) -> Vec<String> {
-        let mut options:Vec<String> = vec!["".to_string()];
-        for ch in self.pattern.chars() {
-            options = match ch {
-                '.'|'#' => options.iter().map(|opt| opt.clone() + &ch.to_string()).collect(),
-                '?' => {
-                    options.iter().fold(vec![], |mut opts, opt| {
-                        if let Some(a) = self.check_partial(opt.clone() + &".") {
-                            opts.push(a);
-                        }
-                        if let Some(b) = self.check_partial(opt.clone() + &"#") {
-                            opts.push(b);
-                        }
-                        opts
-                    })
-                },
-                _ => unreachable!(),
-            }
-        }
-        options
+    pub fn total_permutations(&self) -> usize {
+        self.count_permutation(0, 0, 0, vec![0])
     }
 
-    pub fn check_partial(&self, permutation:String) -> Option<String> {
-        let sequence:Vec<usize> = permutation
-            .split(".")
-            .filter_map(|s| if s.is_empty() { None } else { Some(s.len())})
-            .collect();
-        for (i, block) in sequence.iter().enumerate() {
-            if let Some(requirement) = self.sequence.get(i) {
-                if block > &requirement {
-                    return None
+    pub fn count_permutation(&self, pos:usize, slots_used:usize, slots_filled:usize, mut sequence:Vec<usize>) -> usize {
+        // if there are no more positions to check
+        // either we met requirements or not
+        if pos == self.pattern.len() {
+            if sequence.last().unwrap() == &0 { sequence.pop(); }
+            return if slots_filled == self.needed && self.sequence.starts_with(&sequence) { 1 } else { 0 }
+        };
+
+        // get the next token to match
+        let next:char = self.pattern.chars().nth(pos).unwrap();
+
+        // get the current working grouping
+        let curr:usize = sequence.pop().unwrap();
+
+        match next {
+            '#' => {
+                // does the sequence so far match the required sequence?
+                // then keep going, otherwise, no valid options here
+                if self.sequence.starts_with(&sequence) {
+                    // add to the current working grouping
+                    sequence.push(curr + 1);
+                    self.count_permutation(pos + 1, slots_used, slots_filled + 1, sequence.clone())
+                } else { 0 }
+            },
+
+            '.' => {
+                // if the current working group is not empty
+                // stop adding to it, and start a new one
+                sequence.push(curr);
+                if curr > 0 {
+                    sequence.push(0);
                 }
-            }
-        }
-        Some(permutation.clone())
-    }
+                self.count_permutation(pos + 1, slots_used, slots_filled, sequence)
+            },
 
-    pub fn check_permutation(&self, permutation:&String) -> bool {
-        let sequence:Vec<usize> = permutation
-            .split(".")
-            .filter_map(|s| if s.is_empty() { None } else { Some(s.len())})
-            .collect();
-        sequence == self.sequence
+            '?' => {
+                let hash = {
+                    let mut next_sequence = sequence.clone();
+                    // does the sequence so far match the required sequence?
+                    // then keep going, otherwise, no valid options here
+                    if self.sequence.starts_with(&sequence) {
+                        // add to the current working grouping
+                        next_sequence.push(curr + 1);
+                        self.count_permutation(pos + 1, slots_used, slots_filled + 1, next_sequence)
+                    } else { 0 }
+                };
+                let dot = {
+                    let mut next_sequence = sequence.clone();
+                    // if the current working group is not empty
+                    // stop adding to it, and start a new one
+                    next_sequence.push(curr);
+                    if curr > 0 {
+                        next_sequence.push(0);
+                    }
+                    self.count_permutation(pos + 1, slots_used, slots_filled, next_sequence)
+                };
+
+                hash + dot
+            },
+
+            _ => unreachable!(),
+        }
     }
 
     pub fn to_long(&self) -> Record {
         Record {
             pattern:  vec![self.pattern.clone(); 5].join("?"),
             sequence: vec![self.sequence.clone(); 5].concat(),
+            needed:   vec![self.sequence.clone(); 5].concat().iter().sum(),
         }
     }
 }
@@ -70,6 +96,7 @@ pub fn prepare(file_name: &str) -> Result<Vec<Record>> {
             Record{
                 pattern:  pattern.to_string(),
                 sequence: sequence.split(",").map(|s| s.parse().unwrap()).collect(),
+                needed:   sequence.split(",").map(|s| s.parse::<usize>().unwrap()).sum(),
             }
         })
         .collect();
@@ -79,13 +106,8 @@ pub fn prepare(file_name: &str) -> Result<Vec<Record>> {
 pub fn part_1(input: &Vec<Record>) -> Option<usize> {
     let mut count = 0;
     for (_i, record) in input.iter().enumerate() {
-        let valid = record
-            .collect_permutations()
-            .iter()
-            .filter(|perm| record.check_permutation(perm))
-            .count();
+        let valid = record.total_permutations();
         count += valid;
-        // println!("{i}: {:-<25}> {valid: >2}", record.pattern);
     }
     Some(count)
 }
@@ -93,14 +115,15 @@ pub fn part_1(input: &Vec<Record>) -> Option<usize> {
 pub fn part_2(input: &Vec<Record>) -> Option<usize> {
     let mut count = 0;
     for (_i, record) in input.iter().enumerate() {
-        let long_record = record.to_long();
-        let valid = long_record
-            .collect_permutations()
-            .iter()
-            .filter(|perm| long_record.check_permutation(perm))
-            .count();
+
+        let start = SystemTime::now();
+
+        let valid = record.to_long().total_permutations();
         count += valid;
-        // println!("{i}: {:?} -> {valid}", long_record.pattern);
+
+        let end = SystemTime::now();
+        let duration = end.duration_since(start).unwrap();
+        println!("{_i}: {:-<25}> {valid: >2}  {}.{}s", record.pattern, duration.as_secs(), duration.as_millis());
     }
     Some(count)
 }
@@ -118,7 +141,18 @@ mod test {
     }
 
     #[test]
-    #[ignore]
+    fn test_part_1_parts() {
+        if let Ok(input) = prepare("day12-example.txt") {
+            assert_eq!(input[0].total_permutations(),  1);
+            assert_eq!(input[1].total_permutations(),  4);
+            assert_eq!(input[2].total_permutations(),  1);
+            assert_eq!(input[3].total_permutations(),  1);
+            assert_eq!(input[4].total_permutations(),  4);
+            assert_eq!(input[5].total_permutations(), 10);
+        }
+    }
+
+    #[test]
     fn test_part_1_puzzle() {
         if let Ok(input) = prepare("day12.txt") {
             assert_eq!(part_1(&input), Some(7771))
@@ -126,10 +160,17 @@ mod test {
     }
 
     #[test]
-    #[ignore]
     fn test_part_2() {
         if let Ok(input) = prepare("day12-example.txt") {
             assert_eq!(part_2(&input), Some(525152))
+        }
+    }
+
+    #[test]
+    #[ignore]
+    fn test_part_2_puzzle() {
+        if let Ok(input) = prepare("day12.txt") {
+            assert_eq!(part_2(&input), Some(0))
         }
     }
 }
