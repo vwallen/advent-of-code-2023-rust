@@ -17,6 +17,7 @@ pub mod day10;
 pub mod day11;
 pub mod day12;
 pub mod day14;
+pub mod day15;
 
 pub fn read_input(file_name: &str) -> String {
     let cwd = env::current_dir().unwrap();

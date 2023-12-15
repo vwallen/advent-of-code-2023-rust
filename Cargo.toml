@@ -12,6 +12,7 @@ sscanf = "0.4.1"
 counter = "0.5.7"
 divan = "0.1.5"
 cached = "0.46.1"
+indexmap = "2.1.0"
 
 
 [[bench]]
@@ -63,6 +64,13 @@ name = "day12"
 harness = false
 
 
+
+
+
 [[bench]]
 name = "day14"
+harness = false
+
+[[bench]]
+name = "day15"
 harness = false
